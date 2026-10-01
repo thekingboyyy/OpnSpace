@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b14">
+  <meta name="description" content="Explore the frontier, defeat the alien armada, and bring the galaxy under your banner.">
+  <title>STARFALL — Claim the frontier</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game" id="game">
+    <canvas id="space" aria-label="A top-down view of your ship exploring the galaxy"></canvas>
+    <div class="screen-vignette" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Starfall home">
+        <span class="brand-mark"><span></span></span>
+        <span class="brand-name">STARFALL<span class="brand-sub">FRONTIER COMMAND</span></span>
+      </a>
+      <div class="sector-label"><span class="live-dot"></span><span id="sector-name">UNKNOWN SECTOR</span><span class="sector-divider">/</span><span class="sector-coords" id="coordinates">X 000 · Y 000</span></div>
+      <button class="sound-button" id="sound-button" type="button" aria-label="Toggle sound effects" title="Toggle sound effects">
+        <span id="sound-icon">◖))</span>
+      </button>
+    </header>
+
+    <aside class="mission-panel">
+      <div class="eyebrow"><span class="eyebrow-line"></span>GALACTIC CAMPAIGN</div>
+      <h1>THE LAST<br><span>FRONTIER</span></h1>
+      <p class="mission-copy">The alien Dominion is spreading. Take the stars back, one world at a time.</p>
+      <div class="territory-row">
+        <span>GALAXY CONTROL</span>
+        <span class="territory-count"><b id="control-count">0</b><span> / <span id="world-total">0</span></span></span>
+      </div>
+      <div class="territory-track"><span id="control-fill"></span></div>
+      <div class="world-list" id="world-list"></div>
+      <div class="mission-divider"></div>
+      <div class="objective-label">CURRENT OBJECTIVE</div>
+      <div class="objective-row"><span class="objective-icon" id="objective-icon">⌖</span><span id="objective-text">Explore the system and find a world to liberate.</span></div>
+    </aside>
+
+    <section class="ship-panel" aria-label="Ship status">
+      <div class="ship-heading"><span>VESSEL STATUS</span><span class="ship-class">MK-IV / RANGER</span></div>
+      <div class="ship-stat">
+        <div class="stat-label"><span>HULL INTEGRITY</span><span id="hull-value">100%</span></div>
+        <div class="stat-track hull-track"><span id="hull-fill"></span></div>
+      </div>
+      <div class="ship-stat">
+        <div class="stat-label"><span>BOOST CAPACITOR</span><span id="boost-value">100%</span></div>
+        <div class="stat-track boost-track"><span id="boost-fill"></span></div>
+      </div>
+      <div class="ship-footer"><span class="credit-icon">✦</span><span id="credits">000</span><span class="footer-label">CREDITS</span><span class="footer-spacer"></span><span class="kill-icon">✕</span><span id="kills">00</span><span class="footer-label">KILLS</span></div>
+    </section>
+
+    <section class="radar-panel" aria-label="Nearby objects radar">
+      <div class="radar-heading"><span>TACTICAL SCAN</span><span class="radar-live"><span></span>LIVE</span></div>
+      <canvas id="radar" width="184" height="132" aria-label="Nearby objects"></canvas>
+      <div class="radar-legend"><span><i class="legend-player"></i>YOU</span><span><i class="legend-enemy"></i>HOSTILE</span><span><i class="legend-world"></i>WORLD</span></div>
+    </section>
+
+    <div class="crosshair" id="crosshair" aria-hidden="true"><i></i></div>
+    <div class="fps" id="fps" hidden></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <section class="interaction" id="interaction" hidden>
+      <div class="interaction-top"><span id="interaction-kicker">NEARBY WORLD</span><span id="interaction-distance"></span></div>
+      <div class="interaction-name" id="interaction-name"></div>
+      <div class="interaction-body" id="interaction-body"></div>
+      <div class="capture-track"><span id="capture-fill"></span></div>
+      <div class="interaction-hint"><kbd>E</kbd><span id="interaction-action">BEGIN LIBERATION</span></div>
+    </section>
+
+    <div class="boss-warning" id="boss-warning" hidden><span class="warning-mark">!</span> DOMINION FIGHTER INBOUND</div>
+
+    <footer class="controls">
+      <div class="control-group"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>FLIGHT</span></div>
+      <i class="control-separator"></i>
+      <div class="control-group"><span class="key-wide">MOUSE</span><span>AIM</span></div>
+      <i class="control-separator"></i>
+      <div class="control-group"><kbd>CLICK</kbd><span>FIRE</span></div>
+      <i class="control-separator"></i>
+      <div class="control-group"><kbd>SHIFT</kbd><span>BOOST</span></div>
+      <i class="control-separator"></i>
+      <div class="control-group"><kbd>E</kbd><span>INTERACT</span></div>
+      <i class="control-separator"></i>
+      <div class="control-group"><kbd>B</kbd><span>UPGRADES</span></div>
+    </footer>
+
+    <section class="menu" id="intro-modal" aria-label="Main menu">
+      <canvas id="menu-bg"></canvas>
+      <div class="logo"><span class="logo-ring"><i></i></span><span class="logo-title">STARFALL</span><small>FRONTIER COMMAND</small></div>
+      <nav class="frame menu-main"><h3 id="menu-title">MAIN MENU</h3><div id="menu-items"></div></nav>
+      <section class="frame campaign-config" id="campaign-config" aria-label="New campaign settings" hidden>
+        <h3>MISSION SELECT</h3>
+        <label class="menu-field">CAMPAIGN / CHALLENGE
+          <select id="campaign-select" aria-label="Campaign or challenge">
+            <option value="frontier">Frontier — liberate every world</option>
+            <option value="expedition">Expedition — liberate 8 worlds</option>
+            <option value="survival">Survival — hold out for 3 minutes</option>
+            <option value="bounty">Bounty — defeat 15 hostiles</option>
+          </select>
+        </label>
+        <label class="menu-field">STARTING GALAXY
+          <select id="galaxy-select" aria-label="Starting galaxy"></select>
+        </label>
+        <button class="menu-action" id="launch-campaign" type="button">DEPLOY</button>
+      </section>
+      <div class="frame menu-opts"><h3 id="opts-title"></h3><div id="opts-rows"></div><small class="opts-foot">SECTOR 0714 / OUTER RIM / 4 STAR SYSTEMS</small></div>
+      <button class="apply" id="apply" type="button" hidden>APPLY</button>
+    </section>
+
+    <section class="modal shop-modal" id="shop-modal" aria-labelledby="shop-title" hidden>
+      <div class="modal-content shop-content">
+        <div class="eyebrow modal-eyebrow"><span class="eyebrow-line"></span>FRONTIER SERVICES</div>
+        <h2 id="shop-title">SHIP <span>UPGRADES</span></h2>
+        <p class="modal-copy">Spend mission credits to improve your Ranger.</p>
+        <p class="shop-balance" id="shop-balance">AVAILABLE CREDITS: 0</p>
+        <div id="shop-items" class="shop-items"></div>
+        <button class="launch-button" id="shop-resume" type="button"><span>RESUME FLIGHT</span><span class="launch-arrow">↗</span></button>
+      </div>
+    </section>
+
+    <section class="modal ending-modal" id="ending-modal" aria-labelledby="ending-title" hidden>
+      <div class="modal-stars" aria-hidden="true"></div>
+      <div class="modal-content">
+        <div class="eyebrow modal-eyebrow"><span class="eyebrow-line"></span>GALACTIC CAMPAIGN COMPLETE</div>
+        <h2 id="ending-title">THE STARS<br>ARE <span>OURS.</span></h2>
+        <p class="modal-copy">The Dominion has fallen. Every world in the frontier flies your colors. The galaxy is yours to explore.</p>
+        <div class="briefing-stats"><div><b id="ending-kills">00</b><span>HOSTILES</span></div><i></i><div><b id="ending-credits">000</b><span>CREDITS</span></div><i></i><div><b id="ending-worlds">00</b><span>WORLDS</span></div></div>
+        <button class="launch-button" id="restart-button" type="button"><span>EXPLORE AGAIN</span><span class="launch-arrow">↗</span></button>
+      </div>
+    </section>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
